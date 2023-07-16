@@ -1,0 +1,68 @@
+﻿@page "/simpletodo"
+@inject IBasicToDoServices _services
+
+
+
+<h3>SimpleToDo</h3>
+
+<div>
+    <form>
+        <label for="todoitem">Task to do:</label>
+        <input type="text" name="task" id="todoitem" @bind="taskDescription" />
+        <input value="Add" @onclick="SubmitHandler">
+    </form>
+</div>
+
+@if (_myTasks == null || _myTasks.Count <= 0)
+{
+    <p>Please add some tasks to your to do list.</p>
+}
+else
+{
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        Date Added:
+                    </th>
+                    <th>
+                        Things to do:
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in _myTasks)
+                {
+                    <tr>
+                        <td>
+                            @task.DateAdded
+                        </td>
+                        <td>
+                            @task.Task
+                        </td>
+                        <button @onclick="() => CompleteHandler(task)">Complete</button>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+}
+
+@code {
+
+    public static List<IBasicTask> _myTasks;
+    public string taskDescription;
+
+    public void SubmitHandler()
+    {
+        _myTasks = _services.AddTask(taskDescription);
+        taskDescription = String.Empty;
+    }
+
+    public void CompleteHandler(IBasicTask completed)
+    {
+        _services.CompleteTask(completed);
+    }
+}

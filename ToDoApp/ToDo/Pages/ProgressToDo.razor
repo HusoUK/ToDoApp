@@ -1,0 +1,148 @@
+﻿@page "/progresstodo"
+@inject IProgressToDoServices _services
+
+<h3>ProgressToDo</h3>
+
+<div>
+    <form>
+        <label for="todoitem">Task to do:</label>
+        <input type="text" name="task" id="todoitem" @bind="taskDescription" />
+        <input value="Add" @onclick="SubmitHandler">
+    </form>
+</div>
+
+@if (_myTasks == null || _myTasks.Count <= 0)
+{
+    <p>Please add some tasks to your to do list.</p>
+}
+else
+{
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        Date Added:
+                    </th>
+                    <th>
+                        Things to do:
+                    </th>
+                    <th>
+                        Status:
+                    </th>
+                    <th>
+                        Completed on:
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in _myTasks)
+                {
+                    <tr>
+                        <td>
+                            @task.DateAdded
+                        </td>
+                        <td>
+                            @task.Task
+                        </td>
+                        <td class="@task.TaskProgress">
+                            @task.TaskProgress
+                        </td>
+                        <td>
+                            @task.DateCompleted
+                        </td>
+                        <button @onclick="() => WaitingHandler(task)">Mark as waiting</button>
+                        <button @onclick="() => StartHandler(task)">Mark as starting</button>
+                        <button @onclick="() => CompletedHandler(task)">Mark as completed</button>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (_myCompletedTasks == null || _myCompletedTasks.Count <= 0)
+{
+    <p>You have not completed any tasks yet.</p>
+}
+else
+{
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        Date Added:
+                    </th>
+                    <th>
+                        Things to do:
+                    </th>
+                    <th>
+                        Status:
+                    </th>
+                    <th>
+                        Completed on:
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in _myCompletedTasks)
+                {
+                    <tr>
+                        <td>
+                            @task.DateAdded
+                        </td>
+                        <td>
+                            @task.Task
+                        </td>
+                        <td class="@task.TaskProgress">
+                            @task.TaskProgress
+                        </td>
+                        <td>
+                            @task.DateCompleted
+                        </td>
+                        <button @onclick="() => ArchiveHandler(task)">Mark for archiving</button>
+                        <button @onclick="() => DeleteArchivedHandler(task)">Clear archived task</button>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    public static List<IProgressTask> _myTasks;
+    public static List<IProgressTask> _myCompletedTasks;
+    public string taskDescription;
+
+    public void SubmitHandler()
+    {
+        _myTasks = _services.AddTask(taskDescription);
+        taskDescription = string.Empty;
+    }
+
+    public void WaitingHandler(IProgressTask task)
+    {
+        _services.WaitingTask(task);
+    }
+
+    public void StartHandler(IProgressTask task)
+    {
+        _services.StartTask(task);
+    }
+
+    public void CompletedHandler(IProgressTask task)
+    {
+        _myCompletedTasks = _services.CompleteTask(task);       
+    }
+
+    public void ArchiveHandler(IProgressTask task)
+    {
+        _services.ArchiveTask(task);
+    }
+
+    public void DeleteArchivedHandler(IProgressTask task)
+    {
+        _services.DeleteArchived(task);
+    }
+}
